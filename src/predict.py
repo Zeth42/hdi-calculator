@@ -2,38 +2,38 @@ import os
 import numpy as np
 import joblib
 
-# Cargar el modelo de manera global para que esté listo en memoria
-MODEL_PATH = os.path.join('models', 'idh_model.pkl')
+# Load the trained model into memory globally
+MODEL_PATH = os.path.join('models', 'hdi_model.pkl')
 if os.path.exists(MODEL_PATH):
     model = joblib.load(MODEL_PATH)
 else:
     model = None
 
-def calcular_idh(pib_capita, acceso_elec, consumo_capita, apagones, perdidas, petroleo, gas, renovables):
+def calculate_hdi(gdp_capita, elec_access, consumption_capita, outages, losses, oil, gas, renewables):
     if model is None:
-        return "Error: El modelo no ha sido entrenado o no se encuentra en la ruta."
+        return "Error: Model artifact not found. Please train the model first."
     
-    # Aplicar la misma transformación que en el entrenamiento
-    pib_log = np.log1p(pib_capita)
+    # Apply the same log transformation used during training
+    gdp_log = np.log1p(gdp_capita)
     
-    # Estructurar los datos de entrada en el orden exacto de las features del modelo
+    # Structure the inputs to match the training feature order
     input_data = np.array([[
-        pib_log, acceso_elec, consumo_capita, 
-        apagones, perdidas, petroleo, gas, renovables
+        gdp_log, elec_access, consumption_capita, 
+        outages, losses, oil, gas, renewables
     ]])
     
-    # Predecir y asegurar que no se salga de los límites lógicos del IDH [0, 1]
-    prediccion = model.predict(input_data)[0]
-    idh_final = max(0.0, min(1.0, prediccion))
+    # Predict and bound the output within logical HDI limits [0, 1]
+    prediction = model.predict(input_data)[0]
+    final_hdi = max(0.0, min(1.0, prediction))
     
-    return round(idh_final, 3)
+    return round(final_hdi, 3)
 
-# Pequeña prueba de escritorio para verificar que funcione en consola
+# Quick sanity check / smoke test
 if __name__ == '__main__':
-    print("--- Probando Calculadora de IDH ---")
-    # Ejemplo con datos aproximados de un país de ingresos altos
-    resultado = calcular_idh(
-        pib_capita=45000, acceso_elec=1.0, consumo_capita=6000, 
-        apagones=0.05, perdidas=0.06, petroleo=0.2, gas=0.4, renovables=0.4
+    print("--- Testing HDI Calculator Engine ---")
+    # Sample prediction using proxy values for a high-income profile
+    sample_result = calculate_hdi(
+        gdp_capita=45000, elec_access=1.0, consumption_capita=6000, 
+        outages=0.05, losses=0.06, oil=0.2, gas=0.4, renewables=0.4
     )
-    print(f"IDH Estimado para el ejemplo: {resultado}")
+    print(f"Estimated HDI for sample input: {sample_result}")
