@@ -1,3 +1,12 @@
+---
+title: HDI Calculator
+emoji: ⚡
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # HDI Calculator (Predictive Model Based on Energy and Economic Metrics)
 
 This project develops a multivariate predictive model designed to estimate a country's Human Development Index (HDI) by analyzing the interplay between its electrical infrastructure, energy matrix, and economic capacity (GDP per Capita).

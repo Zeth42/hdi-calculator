@@ -13,18 +13,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateSliderUI = (id, value) => {
         const slider = document.getElementById(id);
         const display = document.getElementById(`${id}_val`);
-        slider.value = value;
-        display.textContent = `${value}%`;
+        
+        if (slider) slider.value = value;
+        if (display) display.textContent = `${value}%`;
 
-        // Matrix distribution validation (Ensure it sums to 100%)
         if (['oil', 'gas', 'renewables'].includes(id)) {
-            const total = parseInt(document.getElementById('oil').value) +
-                          parseInt(document.getElementById('gas').value) +
-                          parseInt(document.getElementById('renewables').value);
-            
+            const oilEl = document.getElementById('oil');
+            const gasEl = document.getElementById('gas');
+            const renEl = document.getElementById('renewables');
             const totalDisplay = document.getElementById('matrix_total_display');
-            totalDisplay.textContent = `Total Matriz: ${total}%`;
-            totalDisplay.style.color = (total !== 100) ? '#ef4444' : '#166534';
+
+            if (oilEl && gasEl && renEl && totalDisplay) {
+                const total = parseInt(oilEl.value || 0) +
+                            parseInt(gasEl.value || 0) +
+                            parseInt(renEl.value || 0);
+                
+                totalDisplay.textContent = `Total Matriz: ${total}%`;
+                totalDisplay.style.color = (total !== 100) ? '#ef4444' : '#166534';
+            }
         }
     };
 
@@ -78,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/predict', {
+            const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
