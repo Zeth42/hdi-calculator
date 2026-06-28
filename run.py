@@ -22,7 +22,8 @@ def run_project():
     frontend_path = os.path.join(root_dir, 'frontend', 'index.html')
     
     # 4. Launch the FastAPI Backend Server as a background process
-    print("📡 Launching FastAPI backend server via Uvicorn...")
+    print("Launching FastAPI backend server via Uvicorn...")
+    
     # Using sys.executable guarantees it hooks to your specific Windows Store python version
     backend_process = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8000"],

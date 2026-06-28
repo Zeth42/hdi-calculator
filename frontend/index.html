@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IDH & Matriz Energética</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 2rem; display: flex; justify-content: center; }
+        
+        /* Expanded layout wrapper to take advantage of full screen width */
+        .container { width: 100%; max-width: 1300px; background: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+        
+        header { text-align: center; margin-bottom: 2.5rem; }
+        header h1 { font-size: 2.2rem; color: #0f172a; margin-bottom: 0.5rem; }
+        header p { color: #64748b; font-size: 1.05rem; }
+
+        /* 3-Column Grid setup with responsive breakpoints */
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; }
+        @media (max-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem; color: #334155; }
+        
+        input[type="number"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #f1f5f9; }
+        input[type="number"]:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+        .slider-container { background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .slider-value { font-weight: bold; color: var(--primary); background: #eff6ff; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.9rem; }
+        input[type="range"] { width: 100%; margin: 0.5rem 0; cursor: pointer; }
+
+        .matrix-box { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .matrix-total { text-align: right; font-size: 0.85rem; font-weight: bold; margin-top: 0.5rem; color: #166534; }
+
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 1rem; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 1rem; }
+        .btn-main:hover { background: var(--primary-dark); }
+
+        .result-card { background: #f8fafc; border: 2px dashed var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 200px; margin-top: 1.5rem; }
+        .result-card.success { background: #eff6ff; border-color: #bfdbfe; border-style: solid; }
+        .hdi-display { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0.5rem 0; line-height: 1; }
+        .badge { padding: 0.4rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.95rem; color: white; background: #64748b; }
+        .badge.VeryHigh { background: var(--success); }
+        .badge.High { background: #3b82f6; }
+        .badge.Medium { background: #f59e0b; }
+        .badge.Low { background: #ef4444; }
+
+        /* Reference Table Layout styling */
+        .reference-section { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        .reference-section h3 { margin-bottom: 1rem; font-size: 1.1rem; color: #0f172a; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem; }
+        th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); }
+        th { background: #f1f5f9; color: #475569; font-weight: 600; }
+        .btn-load { background: #e2e8f0; color: #334155; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; }
+        .btn-load:hover { background: #cbd5e1; color: #0f172a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Calculadora Inteligente de IDH</h1>
+        <p>Simulación del Índice de Desarrollo Humano basado en Economía e Infraestructura Eléctrica</p>
+    </header>
+
+    <div class="grid">
+        <!-- Column 1: Economy and Infrastructure Metrics -->
+        <div>
+            <form id="hdiForm">
+                <div class="form-group">
+                    <label for="gdp_capita">PIB per Cápita (USD Anual)</label>
+                    <input type="number" id="gdp_capita" value="25000" min="100" max="150000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="consumption_capita">Consumo Eléctrico per Cápita (kWh)</label>
+                    <input type="number" id="consumption_capita" value="4500" min="10" max="60000" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <label for="elec_access">Acceso a Electricidad</label>
+                            <span class="slider-value" id="elec_access_val">100%</span>
+                        </div>
+                        <input type="range" id="elec_access" min="0" max="100" value="100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <label for="outages">Empresas con Apagones Frecuentes</label>
+                            <span class="slider-value" id="outages_val">5%</span>
+                        </div>
+                        <input type="range" id="outages" min="0" max="100" value="5">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <label for="losses">Pérdidas de Energía en Transmisión</label>
+                            <span class="slider-value" id="losses_val">7%</span>
+                        </div>
+                        <input type="range" id="losses" min="0" max="100" value="7">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Column 2: Electricity Grid Matrix and Simulation Output -->
+        <div>
+            <div class="form-group slider-container matrix-box">
+                <label style="color: #15803d; margin-bottom: 1rem;">Distribución de la Matriz Eléctrica (Suma 100%)</label>
+                
+                <div class="form-group">
+                    <div class="slider-header">
+                        <label for="oil" style="font-weight:normal; font-size:0.85rem;">Petróleo / Diésel</label>
+                        <span class="slider-value" id="oil_val" style="background:#f0fdf4; color:#166534;">20%</span>
+                    </div>
+                    <input type="range" id="oil" min="0" max="100" value="20" form="hdiForm">
+                </div>
+
+                <div class="form-group">
+                    <div class="slider-header">
+                        <label for="gas" style="font-weight:normal; font-size:0.85rem;">Gas Natural</label>
+                        <span class="slider-value" id="gas_val" style="background:#f0fdf4; color:#166534;">40%</span>
+                    </div>
+                    <input type="range" id="gas" min="0" max="100" value="40" form="hdiForm">
+                </div>
+
+                <div class="form-group">
+                    <div class="slider-header">
+                        <label for="renewables" style="font-weight:normal; font-size:0.85rem;">Renovables / Limpias</label>
+                        <span class="slider-value" id="renewables_val" style="background:#f0fdf4; color:#166534;">40%</span>
+                    </div>
+                    <input type="range" id="renewables" min="0" max="100" value="40" form="hdiForm">
+                </div>
+                <div class="matrix-total" id="matrix_total_display">Total Matriz: 100%</div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-main" form="hdiForm">Calcular IDH Predictivo</button>
+
+            <!-- Real-time Mathematical Model Results Block -->
+            <div class="result-card" id="resultCard">
+                <div id="resultPlaceholder">
+                    <p style="color: #94a3b8; font-weight: 500; font-size: 0.9rem;">Ingresa parámetros o usa un país de referencia.</p>
+                </div>
+                <div id="resultDisplay" style="display: none;">
+                    <h3 style="color: #475569; font-size: 0.9rem; text-transform: uppercase;">IDH Estimado</h3>
+                    <div class="hdi-display" id="hdiValue">0.000</div>
+                    <div class="badge" id="hdiBadge">Desconocido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Global Reference Benchmarks Table -->
+        <div class="reference-section">
+            <h3>Poblaciones de Referencia</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">
+                Comprende el impacto energético usando estadísticas reales. Haz clic en "Cargar" para autocompletar el formulario.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>País</th>
+                        <th>Perfil</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>🇳🇴 <strong>Noruega</strong><br><span style="color:#64748b;">Muy Alto</span></td>
+                        <td>PIB: $87K<br>Renovables: 99%</td>
+                        <td><button class="btn-load" data-country="norway">Cargar</button></td>
+                    </tr>
+                    <tr>
+                        <td>🇲🇽 <strong>México</strong><br><span style="color:#64748b;">Alto</span></td>
+                        <td>PIB: $11K<br>Renovables: 31%</td>
+                        <td><button class="btn-load" data-country="mexico">Cargar</button></td>
+                    </tr>
+                    <tr>
+                        <td>🇳🇬 <strong>Nigeria</strong><br><span style="color:#64748b;">Bajo</span></td>
+                        <td>PIB: $2K<br>Apagones: 82%</td>
+                        <td><button class="btn-load" data-country="nigeria">Cargar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="background: #f1f5f9; padding: 1rem; border-radius: 8px; font-size: 0.85rem; color: #475569; margin-top: 1.5rem;">
+                <strong>Tip de Simulación:</strong> Carga a México y modifica únicamente su matriz hacia 80% Renovables y 20% Gas para ver cómo impactaría la transición energética en su desarrollo humano.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
