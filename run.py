@@ -32,12 +32,8 @@ def run_project():
     
     # 5. Grace period for the local port to open, then launch the interactive UI
     time.sleep(2.5)
-    if os.path.exists(frontend_path):
-        print(f"Opening user interface: {frontend_path}")
-        webbrowser.open(f"file:///{frontend_path}")
-    else:
-        print("Warning: frontend/index.html not found yet. Open browser to http://127.0.0.1:8000/docs instead.")
-        webbrowser.open("http://127.0.0.1:8000/docs")
+    print("Opening user interface via local server...")
+    webbrowser.open("http://127.0.0.1:8000")
         
     print("\nSystem is fully operational. Press CTRL+C in this terminal to shutdown the backend server.")
     
